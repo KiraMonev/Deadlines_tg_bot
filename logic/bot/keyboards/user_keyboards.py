@@ -9,3 +9,9 @@ def start_keyboard():
                  InlineKeyboardButton(text="Просмотр записей", callback_data="show_deadlines"))
 
     return keyboard.as_markup()
+
+
+def back_keyboard():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(InlineKeyboardButton(text="Назад", callback_data="back_btn"))
+    return keyboard.as_markup()
