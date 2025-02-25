@@ -1,9 +1,10 @@
 import logging
-from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo import IndexModel, ASCENDING
 from datetime import datetime
 
-from logic.db.config import MONGO_URI, DB_NAME, COLLECTION_NAME
+from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import ASCENDING, IndexModel
+
+from logic.db.config import COLLECTION_NAME, DB_NAME, MONGO_URI
 
 
 async def init_db():

@@ -5,8 +5,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.types import BotCommand
 
 from logic.bot import get_routers
-from logic.config import BOT_API_TOKEN
-
+from logic.bot.config import BOT_API_TOKEN
 from logic.db.init_db import init_db
 
 

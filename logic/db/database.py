@@ -1,8 +1,9 @@
 import logging
 from datetime import datetime, timedelta
+
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from logic.db.config import MONGO_URI, DB_NAME, COLLECTION_NAME
+from logic.db.config import COLLECTION_NAME, DB_NAME, MONGO_URI
 
 
 class Database:
