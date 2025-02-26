@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timezone
 
 from aiogram import F, Router, types
 from aiogram.enums import ParseMode
@@ -40,15 +41,15 @@ async def set_deadline_date(message: Message, state: FSMContext):
         await db.add_task(user_id=message.from_user.id,
                           text=data["data_text"],
                           deadline_date=data["data_date"],
-                          deadline_time="pass",
+                          deadline_time=datetime.now(timezone.utc).time().strftime("%H:%M"),
                           reminder_date="pass",
                           reminder_time="pass")
         # добавить подтверждение добавления задачи
         await message.answer(f"Мы сохранили задачу\n"
-                             f"*{data['data_text']}*\n"
-                             f"и дедлайн _{data['data_date']}_ в целости и сохранности",
+                             f"<b>{data['data_text']}</b>\n"
+                             f"и дедлайн <i>{data['data_date']}</i> в целости и сохранности",
                              reply_markup=back_keyboard(),
-                             parse_mode=ParseMode.MARKDOWN_V2)
+                             parse_mode=ParseMode.HTML)
     except Exception as e:
         logging.error(e)
         await message.answer(f"Произошла некоторая ошибка, попробуйте ещё раз позже",

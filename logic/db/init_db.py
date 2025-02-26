@@ -15,7 +15,7 @@ async def init_db():
         # Проверяем, существует ли коллекция
         existing_collections = await db.list_collection_names()
         if COLLECTION_NAME not in existing_collections:
-            print(f"Создаём коллекцию {COLLECTION_NAME}...")
+            logging.info(f"Создаём коллекцию {COLLECTION_NAME}...")
 
             # Создаём индексы для быстрого поиска
             await db[COLLECTION_NAME].create_indexes([
@@ -37,10 +37,10 @@ async def init_db():
                 "updated_at": datetime.utcnow()
             }
             await db[COLLECTION_NAME].insert_one(sample_task)
-            print("Тестовая задача добавлена.")
+            logging.info("Тестовая задача добавлена.")
 
         else:
-            print(f"Коллекция {COLLECTION_NAME} уже существует => БД существует")
+            logging.info(f"Коллекция {COLLECTION_NAME} уже существует => БД существует")
     except Exception as e:
         logging.error(f"Ошибка при подключении или работе с базой данных: {e}")
         print("Произошла ошибка при работе с базой данных. Проверьте логи.")
