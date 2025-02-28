@@ -11,6 +11,16 @@ def start_keyboard():
     return keyboard.as_markup()
 
 
+def task_manager_keyboard():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(InlineKeyboardButton(text="Изменить текст", callback_data="change_text"),
+                 InlineKeyboardButton(text="Изменить дедлайн", callback_data="change_deadline"))
+    keyboard.row(InlineKeyboardButton(text="Поставить галочку о выполнении", callback_data="tick_task"))
+    keyboard.row(InlineKeyboardButton(text="Удалить задачу", callback_data="delete_task"))
+    keyboard.row(InlineKeyboardButton(text="Назад", callback_data="back_btn"))
+    return keyboard.as_markup()
+
+
 def back_keyboard():
     keyboard = InlineKeyboardBuilder()
     keyboard.row(InlineKeyboardButton(text="Назад", callback_data="back_btn"))

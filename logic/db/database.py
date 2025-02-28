@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -22,8 +22,8 @@ class Database:
             "is_completed": False,
             "reminder_date": reminder_date,
             "reminder_time": reminder_time,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(timezone(timedelta(hours=3))),
+            "updated_at": datetime.now(timezone(timedelta(hours=3)))
         }
         return await self.collection.insert_one(task)
 
@@ -45,7 +45,8 @@ class Database:
             await self.update_task(task_id, update_data)
 
     async def mark_task_completed(self, task_id):
-        return await self.update_task(task_id, {"is_completed": True})
+        return await self.update_task(task_id, {"is_completed": True,
+                                                "updated_at": datetime.now(timezone(timedelta(hours=3)))})
 
     async def delete_task(self, task_id):
         return await self.collection.delete_one({"_id": task_id})
