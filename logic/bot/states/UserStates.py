@@ -7,3 +7,4 @@ class UserState(StatesGroup):
     TASK_PICK = State()
     TASK_MANAGEMENT = State()
     TASK_CHANGE_TEXT = State()
+    TASK_DELETE_ON_DATE = State()

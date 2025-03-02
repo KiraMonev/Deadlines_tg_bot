@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import datetime
 
 from aiogram import F, Router, types
 from aiogram.enums import ParseMode
@@ -41,7 +41,7 @@ async def set_deadline_date(message: Message, state: FSMContext):
         await db.add_task(user_id=message.from_user.id,
                           text=data["data_text"],
                           deadline_date=data["data_date"],
-                          deadline_time=datetime.now(timezone.utc).time().strftime("%H:%M"),
+                          deadline_time=datetime.now().time().strftime("%H:%M"),
                           reminder_date="pass",
                           reminder_time="pass")
         # добавить подтверждение добавления задачи

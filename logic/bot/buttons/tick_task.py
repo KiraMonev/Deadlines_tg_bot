@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
@@ -21,7 +21,7 @@ async def tick_task_button(callback_query: types.CallbackQuery, state: FSMContex
     # reminder_date = task["reminder_date"]
     # reminder_time = task["reminder_time"]
     created_at = data["current_data"]["created_at"].strftime("%Y-%m-%d %H:%M")
-    updated_at = datetime.now(timezone(timedelta(hours=3))).strftime("%Y-%m-%d %H:%M")
+    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
     text = data["current_data"]["text"]
 
     try:

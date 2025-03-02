@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -22,13 +22,13 @@ class Database:
             "is_completed": False,
             "reminder_date": reminder_date,
             "reminder_time": reminder_time,
-            "created_at": datetime.now(timezone(timedelta(hours=3))),
-            "updated_at": datetime.now(timezone(timedelta(hours=3)))
+            "created_at": datetime.now(),
+            "updated_at": datetime.now()
         }
         return await self.collection.insert_one(task)
 
     async def update_task(self, task_id, update_data: dict):
-        update_data["updated_at"] = datetime.now(timezone(timedelta(hours=3)))
+        update_data["updated_at"] = datetime.now()
         return await self.collection.update_one({"_id": task_id}, {"$set": update_data})
 
     async def update_task_details(self, task_id, new_text: str = None, new_deadline_date: str = None,
@@ -63,7 +63,7 @@ class Database:
 
     # Получить список невыполненных задач пользователя, у которых срок выполнения не истёк.
     async def get_pending_tasks(self, user_id: int):
-        now = datetime.utcnow().strftime("%Y-%m-%d")
+        now = datetime.now().strftime("%Y-%m-%d")
         tasks = await self.collection.find(
             {"user_id": user_id, "deadline_date": {"$gte": now}, "is_completed": False}).to_list(length=None)
         return tasks
@@ -72,12 +72,12 @@ class Database:
         return await self.update_task(task_id, {"reminder_date": reminder_date, "reminder_time": reminder_time})
 
     async def get_tasks_with_reminders(self):
-        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+        now = datetime.now().strftime("%Y-%m-%d %H:%M")
         tasks = await self.collection.find({"reminder_date": {"$lte": now}, "is_completed": False}).to_list(length=None)
         return tasks
 
     async def prolong_overdue_tasks(self):
-        now = datetime.utcnow().strftime("%Y-%m-%d")
+        now = datetime.now().strftime("%Y-%m-%d")
         # потом поиграемся со временем
         overdue_tasks = await self.collection.find({"deadline_date": {"$lt": now}, "is_completed": False}).to_list(
             length=None)

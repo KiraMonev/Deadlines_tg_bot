@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
@@ -34,7 +34,7 @@ async def exchange_text(message: types.Message, state: FSMContext):
     deadline_time = cur_data["current_data"]["deadline_time"]
     is_completed = "Да" if cur_data["current_data"]["is_completed"] else "Нет"
     created_at = cur_data["current_data"]["created_at"].strftime("%Y-%m-%d %H:%M")
-    updated_at = datetime.now(timezone(timedelta(hours=3))).strftime("%Y-%m-%d %H:%M")
+    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
 
     message_text = (
         f"Задача: {new_text}\n\n"
