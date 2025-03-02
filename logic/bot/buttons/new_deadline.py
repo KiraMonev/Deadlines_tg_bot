@@ -15,13 +15,13 @@ router = Router()
 
 @router.callback_query(F.data == "new_deadline")
 async def new_deadline_button(callback_query: types.CallbackQuery, state: FSMContext):
-    await state.set_state(UserState.TASK_TEXT)
+    await state.set_state(UserState.TASK_ADD_TEXT)
     await callback_query.message.edit_text("Вы выбрали 'Добавление новой записи'\n\n"
                                            "Введите текст задачи, которую собираетесь выполнить",
                                            reply_markup=back_keyboard())
 
 
-@router.message(F.text, UserState.TASK_TEXT)
+@router.message(F.text, UserState.TASK_ADD_TEXT)
 async def set_deadline_text(message: Message, state: FSMContext):
     data = {"data_text": message.text}
     print(data)  # временно для тестирования

@@ -2,7 +2,8 @@ from aiogram import Router
 
 
 def get_buttons_router() -> Router:
-    from logic.bot.buttons import (back, delete_deadlines, new_deadline,
+    from logic.bot.buttons import (back, change_task_text, delete_deadlines,
+                                   delete_only_task, new_deadline,
                                    show_deadlines, tick_task)
 
     router = Router()
@@ -11,5 +12,7 @@ def get_buttons_router() -> Router:
     router.include_router(delete_deadlines.router)
     router.include_router(show_deadlines.router)
     router.include_router(tick_task.router)
+    router.include_router(delete_only_task.router)
+    router.include_router(change_task_text.router)
 
     return router

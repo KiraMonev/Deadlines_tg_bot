@@ -17,7 +17,6 @@ async def tick_task_button(callback_query: types.CallbackQuery, state: FSMContex
 
     deadline_date = data["current_data"]["deadline_date"]
     deadline_time = data["current_data"]["deadline_time"]
-    previous_status = data["current_data"]["is_completed"]
     is_completed = "Да"
     # reminder_date = task["reminder_date"]
     # reminder_time = task["reminder_time"]
@@ -25,9 +24,7 @@ async def tick_task_button(callback_query: types.CallbackQuery, state: FSMContex
     updated_at = datetime.now(timezone(timedelta(hours=3))).strftime("%Y-%m-%d %H:%M")
     text = data["current_data"]["text"]
 
-    if previous_status == "Да":
-        await callback_query.answer()
-    else:
+    try:
         message_text = (
             f"Задача: {text}\n\n"
             f"Дедлайн: {deadline_date} {deadline_time}\n"
@@ -36,5 +33,6 @@ async def tick_task_button(callback_query: types.CallbackQuery, state: FSMContex
             f"Обновлена: {updated_at}"
         )
 
-        await db.mark_task_completed(task_id)
         await callback_query.message.edit_text(message_text, reply_markup=task_manager_keyboard())
+    except Exception:
+        await callback_query.answer()

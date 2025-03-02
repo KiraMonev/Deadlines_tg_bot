@@ -57,6 +57,10 @@ class Database:
         tasks = await self.collection.find({"user_id": user_id}).to_list(length=None)
         return tasks
 
+    async def get_task(self, object_id: str):
+        task = await self.collection.find_one({"_id": object_id})
+        return task
+
     # Получить список невыполненных задач пользователя, у которых срок выполнения не истёк.
     async def get_pending_tasks(self, user_id: int):
         now = datetime.utcnow().strftime("%Y-%m-%d")
