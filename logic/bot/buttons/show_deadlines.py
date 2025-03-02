@@ -4,7 +4,8 @@ from operator import itemgetter
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 
-from logic.bot.keyboards.user_keyboards import task_manager_keyboard
+from logic.bot.keyboards.user_keyboards import (back_keyboard,
+                                                task_manager_keyboard)
 from logic.bot.states.UserStates import UserState
 from logic.db.database import db
 
@@ -23,7 +24,7 @@ async def show_deadline_button(callback_query: types.CallbackQuery, state: FSMCo
     data = await db.get_tasks(user_id)
 
     if not data:
-        await callback_query.message.answer("У вас нет задач")
+        await callback_query.message.answer("У вас нет задач", reply_markup=back_keyboard())
         await state.clear()
         return
 
@@ -46,13 +47,13 @@ async def show_details(message: types.Message, state: FSMContext):
     data = await state.get_data()
     tasks = data.get("tasks")
     if not tasks:
-        await message.answer("Ошибка: задачи не найдены")
+        await message.answer("Ошибка: задачи не найдены", reply_markup=back_keyboard())
         return
 
     try:
         task_number = int(message.text)
         if task_number < 1 or task_number > len(tasks):
-            await message.answer("Неверный номер задачи")
+            await message.answer("Неверный номер задачи", reply_markup=back_keyboard())
             return
 
         task = tasks[task_number - 1]
@@ -80,5 +81,5 @@ async def show_details(message: types.Message, state: FSMContext):
         await message.answer(message_text, reply_markup=task_manager_keyboard())
 
     except ValueError:
-        await message.answer("Пожалуйста, введите корректный номер задачи")
+        await message.answer("Пожалуйста, введите корректный номер задачи", reply_markup=back_keyboard())
         await state.clear()

@@ -28,7 +28,7 @@ class Database:
         return await self.collection.insert_one(task)
 
     async def update_task(self, task_id, update_data: dict):
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = datetime.now(timezone(timedelta(hours=3)))
         return await self.collection.update_one({"_id": task_id}, {"$set": update_data})
 
     async def update_task_details(self, task_id, new_text: str = None, new_deadline_date: str = None,
@@ -45,8 +45,7 @@ class Database:
             await self.update_task(task_id, update_data)
 
     async def mark_task_completed(self, task_id):
-        return await self.update_task(task_id, {"is_completed": True,
-                                                "updated_at": datetime.now(timezone(timedelta(hours=3)))})
+        return await self.update_task(task_id, {"is_completed": True})
 
     async def delete_task(self, task_id):
         return await self.collection.delete_one({"_id": task_id})
