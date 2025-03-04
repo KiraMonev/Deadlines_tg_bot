@@ -2,6 +2,7 @@ from itertools import groupby
 from operator import itemgetter
 
 from aiogram import F, Router, types
+from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
 from logic.bot.keyboards.user_keyboards import (back_keyboard,
@@ -34,9 +35,10 @@ async def show_deadline_button(callback_query: types.CallbackQuery, state: FSMCo
     for date, group in groupby(sorted_data, key=itemgetter("deadline_date")):
         tasks = list(group)
         message_text = f"{date}\n" + "\n".join(
-            f"{task_counter + i}. {task['text']}" for i, task in enumerate(tasks)
+            f"{task_counter + i}. {'<s>' + task['text'] + '</s>' if task['is_completed'] else task['text']}"
+            for i, task in enumerate(tasks)
         )
-        await callback_query.message.answer(message_text)
+        await callback_query.message.answer(message_text, parse_mode=ParseMode.HTML)
         task_counter += len(tasks)
 
     await state.update_data(tasks=sorted_data)
