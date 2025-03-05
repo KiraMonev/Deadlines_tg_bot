@@ -54,7 +54,7 @@ class Database:
         return await self.collection.delete_many({"user_id": user_id, "deadline_date": date})
 
     async def get_tasks(self, user_id: int):
-        tasks = await self.collection.find({"user_id": user_id}).to_list(length=None)
+        tasks = await self.collection.find({"user_id": user_id}).sort([("deadline_date", 1), ("created_at", 1)]).to_list(length=None)
         return tasks
 
     async def get_task(self, object_id: str):

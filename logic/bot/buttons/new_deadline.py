@@ -7,6 +7,7 @@ from aiogram.types import Message
 
 from logic.bot.keyboards.user_keyboards import back_keyboard
 from logic.bot.states.UserStates import UserState
+from logic.bot.utils.parser import parse_date, parse_time
 from logic.db.database import db
 
 router = Router()
@@ -22,18 +23,21 @@ async def new_deadline_button(callback_query: types.CallbackQuery, state: FSMCon
 
 @router.message(F.text, UserState.TASK_ADD_TEXT)
 async def set_deadline_text(message: Message, state: FSMContext):
-    data = {"data_text": message.text}
+    await state.update_data(data_text=message.text)
     await state.set_state(UserState.TASK_ADD_DATE)
     await message.answer(f"Отличное дело! Давайте назначим ему дату и время, чтобы не забыть его сдать!\n\n"
                          f"Напишите дату планируемого дедлайна")
-    await state.set_data(data)
 
 
 @router.message(F.text, UserState.TASK_ADD_DATE)
 async def set_deadline_date(message: Message, state: FSMContext):
+    formatted_date = parse_date(message.text)
+    if not formatted_date:
+        await message.answer("Неверный формат даты. Введите дату в формате ДД.ММ или ДД.ММ.ГГГГ")
+        return
+
+    await state.update_data(data_date=formatted_date)
     data = await state.get_data()
-    data["data_date"] = message.text
-    await state.set_data(data)
     await state.set_state(UserState.TASK_ADD_TIME)
     await message.answer(f"Получили дату <i>{data['data_date']}</i>\n\n"
                          f"Введите время дедлайна", parse_mode=ParseMode.HTML)
@@ -41,8 +45,13 @@ async def set_deadline_date(message: Message, state: FSMContext):
 
 @router.message(F.text, UserState.TASK_ADD_TIME)
 async def set_deadline_time(message: Message, state: FSMContext):
+    formatted_time = parse_time(message.text)
+    if not formatted_time:
+        await message.answer("Неверный формат времени. Введите время в формате ЧЧ:ММ")
+        return
+
+    await state.update_data(data_time=formatted_time)
     data = await state.get_data()
-    data["data_time"] = message.text
     try:
         await db.add_task(user_id=message.from_user.id,
                           text=data["data_text"],

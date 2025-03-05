@@ -6,6 +6,7 @@ from aiogram.fsm.context import FSMContext
 from logic.bot.keyboards.user_keyboards import (back_keyboard,
                                                 task_manager_keyboard)
 from logic.bot.states.UserStates import UserState
+from logic.bot.utils.parser import parse_date, parse_time
 from logic.db.database import db
 
 router = Router()
@@ -14,62 +15,52 @@ router = Router()
 @router.callback_query(F.data == "change_deadline")
 async def change_deadline_button(callback_query: types.CallbackQuery, state: FSMContext):
     await state.set_state(UserState.TASK_CHANGE_DATE)
-
-    message_text = "Назначьте новую дату этой задаче"
-
-    await callback_query.message.edit_text(message_text, reply_markup=back_keyboard())
+    await callback_query.message.edit_text("Назначьте новую дату этой задаче", reply_markup=back_keyboard())
 
 
 @router.message(F.text, UserState.TASK_CHANGE_DATE)
 async def exchange_deadline_date(message: types.Message, state: FSMContext):
-    new_deadline_date = message.text
-    data = await state.get_data()
-    await state.clear()
-    data['current_data']['deadline_date'] = new_deadline_date
+    new_date = parse_date(message.text)
+    if not new_date:
+        await message.answer("Неверный формат даты. Введите дату в формате ДД.ММ или ДД.ММ.ГГГГ")
+        return
 
-    message_text = (f"Новая дата для дедлайна: {new_deadline_date}\n\n"
-                    f"Введите новое время для дедлайна")
-
-    await message.answer(message_text)
+    await state.update_data(deadline_date=new_date)
     await state.set_state(UserState.TASK_CHANGE_TIME)
-    await state.set_data(data)
+    await message.answer(f"Новая дата: {new_date}\nВведите новое время для дедлайна")
 
 
 @router.message(F.text, UserState.TASK_CHANGE_TIME)
 async def exchange_deadline_time(message: types.Message, state: FSMContext):
-    new_deadline_time = message.text
+    new_time = parse_time(message.text)
+    if not new_time:
+        await message.answer("Неверный формат времени. Введите время в формате ЧЧ:ММ")
+        return
+
     data = await state.get_data()
-    await state.clear()
-    task_id = data["current_data"]["_id"]
-    new_deadline_date = data['current_data']['deadline_date']
+    task_id = data.get("current_data", {}).get("_id")
+    new_date = data.get("deadline_date")
 
-    cur_data = dict()
-    cur_data["current_data"] = await db.get_task(task_id)
-
-    text = cur_data["current_data"]["text"]
-    deadline_date = new_deadline_date
-    deadline_time = new_deadline_time
-    is_completed = "Да" if cur_data["current_data"]["is_completed"] else "Нет"
-    created_at = cur_data["current_data"]["created_at"].strftime("%Y-%m-%d %H:%M")
-    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
-
-    message_text = (
-        f"Задача: {text}\n\n"
-        f"Дедлайн: {deadline_date} {deadline_time}\n"
-        f"Выполнено: {is_completed}\n"
-        f"Создана: {created_at}\n"
-        f"Обновлена: {updated_at}"
-    )
+    if not task_id:
+        await message.answer("Ошибка: не найдена текущая задача.")
+        return
 
     try:
-        await db.update_task_details(task_id=task_id,
-                                     new_deadline_date=deadline_date,
-                                     new_deadline_time=deadline_time)
-    except Exception as e:
-        await message.answer("Произошла ошибка с сохранением данных")
-    finally:
+        await db.update_task_details(task_id=task_id, new_deadline_date=new_date, new_deadline_time=new_time)
+        task = await db.get_task(task_id)
+
+        message_text = (
+            f"Задача: {task['text']}\n\n"
+            f"Дедлайн: {new_date} {new_time}\n"
+            f"Выполнено: {'Да' if task['is_completed'] else 'Нет'}\n"
+            f"Создана: {task['created_at'].strftime('%Y-%m-%d %H:%M')}\n"
+            f"Обновлена: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        )
         await message.answer(message_text, reply_markup=task_manager_keyboard())
-        new_data = dict()
-        new_data["current_data"] = await db.get_task(task_id)
+
+    except Exception as e:
+        await message.answer("Произошла ошибка при обновлении дедлайна.")
+
+    finally:
         await state.set_state(UserState.TASK_MANAGEMENT)
-        await state.set_data(new_data)
+        await state.update_data(current_data=await db.get_task(task_id))

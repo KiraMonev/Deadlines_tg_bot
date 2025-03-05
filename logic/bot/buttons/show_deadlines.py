@@ -1,3 +1,4 @@
+from datetime import datetime
 from itertools import groupby
 from operator import itemgetter
 
@@ -13,12 +14,24 @@ from logic.db.database import db
 router = Router()
 
 
+def get_hours_left(deadline_date: str, deadline_time: str) -> int:
+    """Возвращает количество часов, оставшихся до дедлайна."""
+    now = datetime.now()
+    deadline_str = f"{deadline_date} {deadline_time}"
+    deadline_dt = datetime.strptime(deadline_str, "%d.%m.%Y %H:%M")
+    time_left = deadline_dt - now
+    return max(0, round(time_left.total_seconds() / 3600))  # Минимум 0, чтобы не было отрицательных значений
+
+
 @router.callback_query(F.data == "show_deadlines")
 async def show_deadline_button(callback_query: types.CallbackQuery, state: FSMContext):
     await callback_query.message.edit_text(
-        "Вы выбрали 'Просмотр всех записей'\n\n"
-        "Напишите номер задачи, которую хотите просмотреть"
+        "📋 <b>Просмотр всех задач</b>\n\n"
+        "✏️ Если хотите изменить задачу, просто напишите её номер.\n"
+        "❗ Для возврата в главное меню используйте кнопку «Назад».",
+        parse_mode=ParseMode.HTML
     )
+
     await state.set_state(UserState.TASK_PICK)
 
     user_id = callback_query.from_user.id
@@ -29,19 +42,25 @@ async def show_deadline_button(callback_query: types.CallbackQuery, state: FSMCo
         await state.clear()
         return
 
-    sorted_data = sorted(data, key=lambda x: (x["deadline_date"], x["created_at"]))
-
     task_counter = 1
-    for date, group in groupby(sorted_data, key=itemgetter("deadline_date")):
-        tasks = list(group)
-        message_text = f"{date}\n" + "\n".join(
-            f"{task_counter + i}. {'<s>' + task['text'] + '</s>' if task['is_completed'] else task['text']}"
-            for i, task in enumerate(tasks)
-        )
+    for date, group in groupby(data, key=itemgetter("deadline_date")):
+        tasks = sorted(group, key=itemgetter("deadline_time"))
+        message_text = f"🗓 <b>{date}</b>\n"
+
+        for i, task in enumerate(tasks):
+            hours_left = get_hours_left(task["deadline_date"], task["deadline_time"])
+            task_text = f"<b>№{task_counter + i} {task['deadline_time']}</b> ({hours_left} ч)\n"
+            task_text += f"{'<s>' + task['text'] + '</s>' if task['is_completed'] else task['text']}"
+            message_text += task_text + "\n"
         await callback_query.message.answer(message_text, parse_mode=ParseMode.HTML)
         task_counter += len(tasks)
 
-    await state.update_data(tasks=sorted_data)
+    await callback_query.message.answer(
+        "Вернуться назад",
+        reply_markup=back_keyboard()
+    )
+
+    await state.update_data(tasks=data)
 
 
 @router.message(F.text, UserState.TASK_PICK)
