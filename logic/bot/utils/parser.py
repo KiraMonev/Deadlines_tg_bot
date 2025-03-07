@@ -27,7 +27,7 @@ def parse_time(time_str: str) -> str | None:
         if len(parts) == 2:
             try:
                 hours, minutes = int(parts[0]), int(parts[1])
-                if 0 <= hours <= 24 and 0 <= minutes <= 59:
+                if 0 <= hours <= 23 and 0 <= minutes <= 59:
                     return f"{hours:02}:{minutes:02}"
             except ValueError:
                 return None

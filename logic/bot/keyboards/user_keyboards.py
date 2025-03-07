@@ -1,3 +1,6 @@
+import logging
+
+from aiogram import Bot
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -25,3 +28,14 @@ def back_keyboard():
     keyboard = InlineKeyboardBuilder()
     keyboard.row(InlineKeyboardButton(text="Назад", callback_data="back_btn"))
     return keyboard.as_markup()
+
+
+async def remove_keyboard(bot: Bot, chat_id: int, message_id: int) -> None:
+    try:
+        await bot.edit_message_reply_markup(
+            chat_id=chat_id,
+            message_id=message_id,
+            reply_markup=None
+        )
+    except Exception as e:
+        logging.error(e)

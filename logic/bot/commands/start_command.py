@@ -1,4 +1,5 @@
 from aiogram import Router
+from aiogram.enums import ParseMode
 from aiogram.filters import Command
 from aiogram.types import Message
 
@@ -14,5 +15,9 @@ async def start_command(message: Message):
 
     # реализовать сохранение в БД
 
-    await message.answer(f"Привет! Я - твой помощник в отслеживании дедлайнов!\n\n"
-                         f"Выбери из списка то, что хочешь сделать и начнём", reply_markup=start_keyboard())
+    await message.answer(
+        "👋 <b>Привет!</b> Я — твой личный помощник по дедлайнам! ⏳\n\n"
+        "🔽 Выбери действие ниже и начнём! 🔽",
+        reply_markup=start_keyboard(),
+        parse_mode=ParseMode.HTML
+    )
