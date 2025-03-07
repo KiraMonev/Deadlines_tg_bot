@@ -6,7 +6,7 @@ from aiogram import F, Router, types
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
-from logic.bot.keyboards.user_keyboards import (back_keyboard,
+from logic.bot.keyboards.user_keyboards import (back_keyboard, remove_keyboard,
                                                 task_manager_keyboard)
 from logic.bot.states.UserStates import UserState
 from logic.db.database import db
@@ -55,26 +55,32 @@ async def show_deadline_button(callback_query: types.CallbackQuery, state: FSMCo
         await callback_query.message.answer(message_text, parse_mode=ParseMode.HTML)
         task_counter += len(tasks)
 
-    await callback_query.message.answer(
+    new_message = await callback_query.message.answer(
         "Вернуться назад",
         reply_markup=back_keyboard()
     )
-
+    await state.update_data(last_message_id=new_message.message_id)
     await state.update_data(tasks=data)
 
 
 @router.message(F.text, UserState.TASK_PICK)
 async def show_details(message: types.Message, state: FSMContext):
     data = await state.get_data()
+    last_message_id = data.get("last_message_id")
+    if last_message_id:
+        await remove_keyboard(message.bot, message.chat.id, last_message_id)
+
     tasks = data.get("tasks")
     if not tasks:
-        await message.answer("Ошибка: задачи не найдены", reply_markup=back_keyboard())
+        new_message = await message.answer("Ошибка: задачи не найдены", reply_markup=back_keyboard())
+        await state.update_data(last_message_id=new_message.message_id)
         return
 
     try:
         task_number = int(message.text)
         if task_number < 1 or task_number > len(tasks):
-            await message.answer("Неверный номер задачи", reply_markup=back_keyboard())
+            new_message = await message.answer("Неверный номер задачи", reply_markup=back_keyboard())
+            await state.update_data(last_message_id=new_message.message_id)
             return
 
         task = tasks[task_number - 1]

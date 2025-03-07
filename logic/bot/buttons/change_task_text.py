@@ -1,9 +1,10 @@
 from datetime import datetime
 
 from aiogram import F, Router, types
+from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
-from logic.bot.keyboards.user_keyboards import (back_keyboard,
+from logic.bot.keyboards.user_keyboards import (back_keyboard, remove_keyboard,
                                                 task_manager_keyboard)
 from logic.bot.states.UserStates import UserState
 from logic.db.database import db
@@ -14,16 +15,22 @@ router = Router()
 @router.callback_query(F.data == "change_text")
 async def change_text_button(callback_query: types.CallbackQuery, state: FSMContext):
     await state.set_state(UserState.TASK_CHANGE_TEXT)
-
-    message_text = "Назначьте новый текст этой задаче"
-
-    await callback_query.message.edit_text(message_text, reply_markup=back_keyboard())
+    message = await callback_query.message.edit_text(
+        "✏️ Назначьте новый <b>текст</b> этой задаче",
+        reply_markup=back_keyboard(),
+        parse_mode=ParseMode.HTML
+    )
+    await state.update_data(last_message_id=message.message_id)
 
 
 @router.message(F.text, UserState.TASK_CHANGE_TEXT)
 async def exchange_text(message: types.Message, state: FSMContext):
-    new_text = message.text
     data = await state.get_data()
+    last_message_id = data.get("last_message_id")
+    if last_message_id:
+        await remove_keyboard(message.bot, message.chat.id, last_message_id)
+
+    new_text = message.text
     await state.clear()
     task_id = data["current_data"]["_id"]
 
@@ -47,7 +54,10 @@ async def exchange_text(message: types.Message, state: FSMContext):
     try:
         await db.update_task_details(task_id=task_id, new_text=new_text)
     except Exception as e:
-        await message.answer("Произошла ошибка с сохранением нового текста")
+        await message.answer(
+            "Произошла ошибка с сохранением нового текста",
+            reply_markup=back_keyboard()
+        )
     finally:
         await message.answer(message_text, reply_markup=task_manager_keyboard())
         new_data = dict()

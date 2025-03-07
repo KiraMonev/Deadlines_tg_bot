@@ -1,4 +1,4 @@
-from aiogram import Bot, F, Router, types
+from aiogram import F, Router, types
 from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
@@ -14,7 +14,7 @@ router = Router()
 async def delete_deadlines_button(callback_query: types.CallbackQuery, state: FSMContext):
     message = await callback_query.message.edit_text(
         "🗑 <b>Удаление записей</b>\n\n"
-        "📅 Введите <b>дату</b>, с которой нужно удалить все дедлайны.",
+        "🗓 Введите <b>дату</b>, с которой нужно удалить все дедлайны.",
         reply_markup=back_keyboard(),
         parse_mode=ParseMode.HTML
     )
@@ -59,7 +59,7 @@ async def delete_deadlines(message: types.Message, state: FSMContext):
     await db.delete_tasks_by_date(user_id=user_id, date=date)
     if last_message_id:
         await remove_keyboard(message.bot, message.chat.id, last_message_id)
-    new_message = await message.answer(
+    await message.answer(
         f"Задачи на <i>{date}</i> успешно удалены",
         parse_mode=ParseMode.HTML,
         reply_markup=back_keyboard()
