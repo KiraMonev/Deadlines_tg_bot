@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
@@ -54,7 +54,8 @@ class Database:
         return await self.collection.delete_many({"user_id": user_id, "deadline_date": date})
 
     async def get_tasks(self, user_id: int):
-        tasks = await self.collection.find({"user_id": user_id}).sort([("deadline_date", 1), ("created_at", 1)]).to_list(length=None)
+        tasks = await self.collection.find({"user_id": user_id}).sort(
+            [("deadline_date", 1), ("created_at", 1)]).to_list(length=None)
         return tasks
 
     async def get_task(self, object_id: str):
@@ -74,6 +75,15 @@ class Database:
     async def get_tasks_with_reminders(self):
         now = datetime.now().strftime("%Y-%m-%d %H:%M")
         tasks = await self.collection.find({"reminder_date": {"$lte": now}, "is_completed": False}).to_list(length=None)
+        return tasks
+
+    async def get_tasks_with_reminders_date_and_time(self):
+        now = datetime.now(timezone.utc) + timedelta(hours=3)
+        now_date = now.strftime("%d.%m.%Y")
+        now_time = now.strftime("%H:%M")
+        tasks = await self.collection.find({"reminder_date": {"$eq": now_date},
+                                            "reminder_time": {"$eq": now_time},
+                                            "is_completed": False}).to_list()
         return tasks
 
     async def prolong_overdue_tasks(self):

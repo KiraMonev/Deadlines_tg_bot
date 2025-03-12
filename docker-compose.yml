@@ -1,0 +1,37 @@
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  celery_worker:
+    build: .
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/
+      - REDIS_URL=redis://redis:6379/0
+      - PYTHONPATH=/app
+    command: celery -A logic.queue.celery_app:app worker --loglevel=info
+
+  celery_beat:
+    build: .
+    depends_on:
+      - mongo
+      - redis
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/
+      - REDIS_URL=redis://redis:6379/0
+      - PYTHONPATH=/app
+    command: celery -A logic.queue.celery_app:app beat --loglevel=info
+
+volumes:
+  mongo_data:

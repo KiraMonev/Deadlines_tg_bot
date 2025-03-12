@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime, timedelta
 
 from aiogram import F, Router, types
 from aiogram.enums import ParseMode
@@ -94,14 +95,17 @@ async def set_deadline_time(message: Message, state: FSMContext):
 
     await state.update_data(data_time=formatted_time)
     data = await state.get_data()
+    deadline_time = datetime.strptime(data["data_time"], "%H:%M")
+    reminder_date = data['data_date']
+    reminder_time = (deadline_time - timedelta(hours=0, minutes=1)).time().strftime("%H:%M")
+
     try:
         await db.add_task(user_id=message.from_user.id,
                           text=data["data_text"],
                           deadline_date=data["data_date"],
                           deadline_time=data["data_time"],
-                          reminder_date="pass",
-                          reminder_time="pass")
-        # добавить подтверждение добавления задачи
+                          reminder_date=reminder_date,
+                          reminder_time=reminder_time)
         await message.answer(
             f"✅ <b>Задача сохранена!</b>\n\n"
             f"Задача: {data['data_text']}\n"
