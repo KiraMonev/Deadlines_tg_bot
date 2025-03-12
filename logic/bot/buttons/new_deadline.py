@@ -6,9 +6,11 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from logic.bot.keyboards.user_keyboards import back_keyboard, remove_keyboard
+from logic.bot.keyboards.user_keyboards import (back_keyboard,
+                                                reminder_time_keyboard,
+                                                remove_keyboard)
 from logic.bot.states.UserStates import UserState
-from logic.bot.utils.parser import parse_date, parse_time
+from logic.bot.utils.parser import calculate_reminder, parse_date, parse_time
 from logic.db.database import db
 
 router = Router()
@@ -94,19 +96,42 @@ async def set_deadline_time(message: Message, state: FSMContext):
         return
 
     await state.update_data(data_time=formatted_time)
+    new_message = await message.answer(
+        f"🗓 Получили время: <i>{data['data_date']}</i>\n\n"
+        "⏰ Теперь установите <b>напоминание</b> для дедлайна.",
+        parse_mode=ParseMode.HTML,
+        reply_markup=reminder_time_keyboard()
+    )
+    await state.update_data(last_message_id=new_message.message_id)
+    await state.set_state(UserState.TASK_ADD_REMINDER_TIME)
+
+
+REMINDER_TIMES = {
+    "reminder_1h": timedelta(hours=1),
+    "reminder_4h": timedelta(hours=4),
+    "reminder_1d": timedelta(days=1),
+    "reminder_none": None,  # Отсутствие напоминания
+}
+
+
+@router.callback_query(F.data.in_(REMINDER_TIMES.keys()), UserState.TASK_ADD_REMINDER_TIME)
+async def set_reminder_time(callback_query: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
-    deadline_time = datetime.strptime(data["data_time"], "%H:%M")
-    reminder_date = data['data_date']
-    reminder_time = (deadline_time - timedelta(hours=0, minutes=1)).time().strftime("%H:%M")
+    last_message_id = data.get("last_message_id")
+    if last_message_id:
+        await remove_keyboard(callback_query.bot, callback_query.message.chat.id, last_message_id)
+
+    reminder_offset = REMINDER_TIMES[callback_query.data]
+    reminder_date, reminder_time = await calculate_reminder(reminder_offset=reminder_offset, data=data)
 
     try:
-        await db.add_task(user_id=message.from_user.id,
+        await db.add_task(user_id=callback_query.from_user.id,
                           text=data["data_text"],
                           deadline_date=data["data_date"],
                           deadline_time=data["data_time"],
                           reminder_date=reminder_date,
                           reminder_time=reminder_time)
-        await message.answer(
+        await callback_query.message.edit_text(
             f"✅ <b>Задача сохранена!</b>\n\n"
             f"Задача: {data['data_text']}\n"
             f"Дедлайн: <i>{data['data_date']} {data['data_time']}</i>\n\n"
@@ -117,7 +142,7 @@ async def set_deadline_time(message: Message, state: FSMContext):
 
     except Exception as e:
         logging.error(e)
-        await message.answer(f"Произошла некоторая ошибка, попробуйте ещё раз позже",
-                             reply_markup=back_keyboard())
+        await callback_query.answer(f"Произошла некоторая ошибка, попробуйте ещё раз позже",
+                                    reply_markup=back_keyboard())
     finally:
         await state.clear()

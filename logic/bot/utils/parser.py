@@ -32,3 +32,24 @@ def parse_time(time_str: str) -> str | None:
             except ValueError:
                 return None
     return None
+
+
+async def calculate_reminder(reminder_offset, data: dict) -> tuple:
+    if not reminder_offset:
+        return None, None
+
+    # Получаем дату и время дедлайна
+    deadline_date = datetime.strptime(data["data_date"], "%d.%m.%Y")
+    deadline_time = datetime.strptime(data["data_time"], "%H:%M").time()
+
+    # Комбинируем дату и время дедлайна
+    deadline_datetime = datetime.combine(deadline_date, deadline_time)
+
+    # Вычитаем смещение (например, 1 час, 4 часа или 1 день)
+    reminder_datetime = deadline_datetime - reminder_offset
+
+    # Форматируем результат
+    reminder_date = reminder_datetime.strftime("%d.%m.%Y")
+    reminder_time = reminder_datetime.strftime("%H:%M")
+
+    return reminder_date, reminder_time

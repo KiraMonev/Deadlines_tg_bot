@@ -30,6 +30,18 @@ def back_keyboard():
     return keyboard.as_markup()
 
 
+def reminder_time_keyboard():
+    keyboard = InlineKeyboardBuilder()
+    keyboard.row(
+        InlineKeyboardButton(text="За 1 час", callback_data="reminder_1h"),
+        InlineKeyboardButton(text="За 4 часа", callback_data="reminder_4h"),
+        InlineKeyboardButton(text="За 1 день", callback_data="reminder_1d"),
+    )
+    keyboard.row(InlineKeyboardButton(text="Не напоминать", callback_data="reminder_none"))
+    keyboard.row(InlineKeyboardButton(text="Главное меню", callback_data="back_btn"))
+    return keyboard.as_markup()
+
+
 async def remove_keyboard(bot: Bot, chat_id: int, message_id: int) -> None:
     try:
         await bot.edit_message_reply_markup(

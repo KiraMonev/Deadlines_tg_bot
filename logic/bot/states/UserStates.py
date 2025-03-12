@@ -11,3 +11,4 @@ class UserState(StatesGroup):
     TASK_CHANGE_DATE = State()
     TASK_CHANGE_TIME = State()
     TASK_DELETE_ON_DATE = State()
+    TASK_ADD_REMINDER_TIME = State()

@@ -7,6 +7,8 @@ app = Celery('bot_tasks', broker=REDIS_URL)
 app.conf.worker_pool = 'solo'
 app.conf.worker_concurrency = 1
 
+import logic.queue.tasks
+
 app.conf.beat_schedule = {
     'check-reminders-every-minute': {
         'task': 'logic.queue.tasks.check_reminders',
