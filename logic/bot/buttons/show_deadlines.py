@@ -90,15 +90,21 @@ async def show_details(message: types.Message, state: FSMContext):
         deadline_date = task["deadline_date"]
         deadline_time = task["deadline_time"]
         is_completed = "Да" if task["is_completed"] else "Нет"
-        # reminder_date = task["reminder_date"]
-        # reminder_time = task["reminder_time"]
         created_at = task["created_at"].strftime("%Y-%m-%d %H:%M")
         updated_at = task["updated_at"].strftime("%Y-%m-%d %H:%M")
         text = task["text"]
 
+        reminder_date = task["reminder_date"]
+        reminder_time = task["reminder_time"]
+        if reminder_date and reminder_time:
+            reminder_text = f"{reminder_date} {reminder_time}"
+        else:
+            reminder_text = "Не установлено"
+
         message_text = (
-            f"Задача: {text}\n\n"
+            f"Задача: {text}\n"
             f"Дедлайн: {deadline_date} {deadline_time}\n"
+            f"Напоминание: {reminder_text}\n"
             f"Выполнено: {is_completed}\n"
             f"Создана: {created_at}\n"
             f"Обновлена: {updated_at}"

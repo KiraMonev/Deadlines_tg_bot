@@ -10,7 +10,7 @@ def parse_date(date_str: str) -> str | None:
     for sep in separators:
         parts = date_str.split(sep)
         if len(parts) == 2:
-            parts.append(str(current_year))  # Добавляем текущий год, если не указан
+            parts.append(str(current_year))  # Текущий год, если не указан
         if len(parts) == 3:
             try:
                 return datetime.strptime(".".join(parts), "%d.%m.%Y").strftime("%d.%m.%Y")
@@ -34,21 +34,17 @@ def parse_time(time_str: str) -> str | None:
     return None
 
 
-async def calculate_reminder(reminder_offset, data: dict) -> tuple:
+async def calculate_reminder(reminder_offset, date, time) -> tuple:
     if not reminder_offset:
         return None, None
 
-    # Получаем дату и время дедлайна
-    deadline_date = datetime.strptime(data["data_date"], "%d.%m.%Y")
-    deadline_time = datetime.strptime(data["data_time"], "%H:%M").time()
+    deadline_date = datetime.strptime(date, "%d.%m.%Y")
+    deadline_time = datetime.strptime(time, "%H:%M").time()
 
-    # Комбинируем дату и время дедлайна
     deadline_datetime = datetime.combine(deadline_date, deadline_time)
 
-    # Вычитаем смещение (например, 1 час, 4 часа или 1 день)
     reminder_datetime = deadline_datetime - reminder_offset
 
-    # Форматируем результат
     reminder_date = reminder_datetime.strftime("%d.%m.%Y")
     reminder_time = reminder_datetime.strftime("%H:%M")
 

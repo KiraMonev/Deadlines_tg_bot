@@ -1,5 +1,4 @@
 import logging
-from datetime import datetime
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import ASCENDING, IndexModel
@@ -24,21 +23,6 @@ async def init_db():
                 IndexModel([("is_completed", ASCENDING)])
             ])
 
-            # Пример тестовой задачи (можно удалить)
-            sample_task = {
-                "user_id": 123456789,
-                "text": "Купить молоко",
-                "deadline_date": "2025-02-25",
-                "deadline_time": "15:00",
-                "is_completed": False,
-                "reminder_date": "2025-02-25",
-                "reminder_time": "14:30",
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
-            }
-            await db[COLLECTION_NAME].insert_one(sample_task)
-            logging.info("Тестовая задача добавлена.")
-
         else:
             logging.info(f"Коллекция {COLLECTION_NAME} уже существует => БД существует")
     except Exception as e:
@@ -46,5 +30,4 @@ async def init_db():
         print("Произошла ошибка при работе с базой данных. Проверьте логи.")
 
     finally:
-        # Закрытие соединения (не обязательно, но хорошая практика)
         client.close()

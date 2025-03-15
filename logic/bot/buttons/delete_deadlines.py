@@ -64,4 +64,4 @@ async def delete_deadlines(message: types.Message, state: FSMContext):
         parse_mode=ParseMode.HTML,
         reply_markup=back_keyboard()
     )
-    await state.clear()
+    # await state.clear()

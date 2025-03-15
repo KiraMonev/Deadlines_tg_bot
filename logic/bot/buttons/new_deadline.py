@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from aiogram import F, Router, types
 from aiogram.enums import ParseMode
@@ -96,8 +96,9 @@ async def set_deadline_time(message: Message, state: FSMContext):
         return
 
     await state.update_data(data_time=formatted_time)
+    data = await state.get_data()
     new_message = await message.answer(
-        f"🗓 Получили время: <i>{data['data_date']}</i>\n\n"
+        f"🗓 Получили время: <i>{data['data_time']}</i>\n\n"
         "⏰ Теперь установите <b>напоминание</b> для дедлайна.",
         parse_mode=ParseMode.HTML,
         reply_markup=reminder_time_keyboard()
@@ -122,7 +123,11 @@ async def set_reminder_time(callback_query: types.CallbackQuery, state: FSMConte
         await remove_keyboard(callback_query.bot, callback_query.message.chat.id, last_message_id)
 
     reminder_offset = REMINDER_TIMES[callback_query.data]
-    reminder_date, reminder_time = await calculate_reminder(reminder_offset=reminder_offset, data=data)
+    reminder_date, reminder_time = await calculate_reminder(
+        reminder_offset=reminder_offset,
+        date=data["data_date"],
+        time=data["data_time"]
+    )
 
     try:
         await db.add_task(user_id=callback_query.from_user.id,

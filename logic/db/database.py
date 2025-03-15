@@ -31,8 +31,11 @@ class Database:
         update_data["updated_at"] = datetime.now()
         return await self.collection.update_one({"_id": task_id}, {"$set": update_data})
 
-    async def update_task_details(self, task_id, new_text: str = None, new_deadline_date: str = None,
-                                  new_deadline_time: str = None):
+    async def update_task_details(
+        self, task_id, new_text: str = None,
+        new_deadline_date: str = None, new_deadline_time: str = None,
+        reminder_date: str = None, reminder_time: str = None
+    ):
         update_data = {}
         if new_text:
             update_data["text"] = new_text
@@ -40,6 +43,10 @@ class Database:
             update_data["deadline_date"] = new_deadline_date
         if new_deadline_time:
             update_data["deadline_time"] = new_deadline_time
+        if reminder_date:
+            update_data["reminder_date"] = reminder_date
+        if reminder_time:
+            update_data["reminder_time"] = reminder_time
 
         if update_data:
             await self.update_task(task_id, update_data)

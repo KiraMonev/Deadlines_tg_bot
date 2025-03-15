@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 from aiogram import F, Router, types
@@ -43,9 +44,18 @@ async def exchange_text(message: types.Message, state: FSMContext):
     created_at = cur_data["current_data"]["created_at"].strftime("%Y-%m-%d %H:%M")
     updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
 
+    reminder_date = cur_data["current_data"]["reminder_date"]
+    reminder_time = cur_data["current_data"]["reminder_time"]
+    if reminder_date and reminder_time:
+        reminder_text = f"{reminder_date} {reminder_time}"
+    else:
+        reminder_text = "Не установлено"
+
     message_text = (
-        f"Задача: {new_text}\n\n"
+        f"✅ <b>Задача обновлена!</b>\n\n"
+        f"Задача: {new_text}\n"
         f"Дедлайн: {deadline_date} {deadline_time}\n"
+        f"Напоминание: {reminder_text}\n"
         f"Выполнено: {is_completed}\n"
         f"Создана: {created_at}\n"
         f"Обновлена: {updated_at}"
@@ -54,12 +64,13 @@ async def exchange_text(message: types.Message, state: FSMContext):
     try:
         await db.update_task_details(task_id=task_id, new_text=new_text)
     except Exception as e:
+        logging.error(e)
         await message.answer(
             "Произошла ошибка с сохранением нового текста",
             reply_markup=back_keyboard()
         )
     finally:
-        await message.answer(message_text, reply_markup=task_manager_keyboard())
+        await message.answer(message_text, reply_markup=task_manager_keyboard(), parse_mode=ParseMode.HTML)
         new_data = dict()
         new_data["current_data"] = await db.get_task(task_id)
         await state.set_state(UserState.TASK_MANAGEMENT)
