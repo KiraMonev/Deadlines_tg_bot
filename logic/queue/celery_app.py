@@ -14,4 +14,8 @@ app.conf.beat_schedule = {
         'task': 'logic.queue.tasks.check_reminders',
         'schedule': 60.0,  # Выполнять каждые 60 секунд
     },
+    'prolonging-tasks-every-minute': {
+        'task': 'logic.queue.tasks.prolonging_tasks',
+        'schedule': 60.0,
+    }
 }

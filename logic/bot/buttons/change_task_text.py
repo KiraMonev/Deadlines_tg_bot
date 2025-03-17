@@ -19,7 +19,6 @@ async def change_text_button(callback_query: types.CallbackQuery, state: FSMCont
     message = await callback_query.message.edit_text(
         "✏️ Назначьте новый <b>текст</b> этой задаче",
         reply_markup=back_keyboard(),
-        parse_mode=ParseMode.HTML
     )
     await state.update_data(last_message_id=message.message_id)
 

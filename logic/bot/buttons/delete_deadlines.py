@@ -1,5 +1,4 @@
 from aiogram import F, Router, types
-from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
 from logic.bot.keyboards.user_keyboards import back_keyboard, remove_keyboard
@@ -16,7 +15,6 @@ async def delete_deadlines_button(callback_query: types.CallbackQuery, state: FS
         "🗑 <b>Удаление записей</b>\n\n"
         "🗓 Введите <b>дату</b>, с которой нужно удалить все дедлайны.",
         reply_markup=back_keyboard(),
-        parse_mode=ParseMode.HTML
     )
     # Сохраняем ID сообщения в состоянии
     await state.update_data(last_message_id=message.message_id)
@@ -36,7 +34,6 @@ async def delete_deadlines(message: types.Message, state: FSMContext):
         new_message = await message.answer(
             "<b>Неверный формат даты</b>\n\n"
             "Пожалуйста, введите дату в формате <code>ДД.ММ</code> или <code>ДД.ММ.ГГГГ</code>.",
-            parse_mode=ParseMode.HTML,
             reply_markup=back_keyboard()
         )
         await state.update_data(last_message_id=new_message.message_id)
@@ -50,7 +47,6 @@ async def delete_deadlines(message: types.Message, state: FSMContext):
             await remove_keyboard(message.bot, message.chat.id, last_message_id)
         new_message = await message.answer(
             f"<b>Нет задач на {date}</b>",
-            parse_mode=ParseMode.HTML,
             reply_markup=back_keyboard()
         )
         await state.update_data(last_message_id=new_message.message_id)
@@ -61,7 +57,6 @@ async def delete_deadlines(message: types.Message, state: FSMContext):
         await remove_keyboard(message.bot, message.chat.id, last_message_id)
     await message.answer(
         f"Задачи на <i>{date}</i> успешно удалены",
-        parse_mode=ParseMode.HTML,
         reply_markup=back_keyboard()
     )
     # await state.clear()

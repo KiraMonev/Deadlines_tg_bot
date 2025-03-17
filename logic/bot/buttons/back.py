@@ -1,5 +1,4 @@
 from aiogram import F, Router, types
-from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
 from logic.bot.keyboards.user_keyboards import start_keyboard
@@ -14,5 +13,4 @@ async def back_button(callback_query: types.CallbackQuery, state: FSMContext):
         "👋 <b>Привет!</b> Я — твой личный помощник по дедлайнам! ⏳\n\n"
         "🔽 Выбери действие ниже и начнём! 🔽",
         reply_markup=start_keyboard(),
-        parse_mode=ParseMode.HTML
     )

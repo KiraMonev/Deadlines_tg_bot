@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta, timezone
 
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -28,13 +27,13 @@ class Database:
         return await self.collection.insert_one(task)
 
     async def update_task(self, task_id, update_data: dict):
-        update_data["updated_at"] = datetime.now()
+        update_data["updated_at"] = datetime.now(timezone.utc) + timedelta(hours=3)
         return await self.collection.update_one({"_id": task_id}, {"$set": update_data})
 
     async def update_task_details(
-        self, task_id, new_text: str = None,
-        new_deadline_date: str = None, new_deadline_time: str = None,
-        reminder_date: str = None, reminder_time: str = None
+            self, task_id, new_text: str = None,
+            new_deadline_date: str = None, new_deadline_time: str = None,
+            reminder_date: str = None, reminder_time: str = None
     ):
         update_data = {}
         if new_text:
@@ -93,16 +92,14 @@ class Database:
                                             "is_completed": False}).to_list()
         return tasks
 
-    async def prolong_overdue_tasks(self):
-        now = datetime.now().strftime("%Y-%m-%d")
-        # потом поиграемся со временем
-        overdue_tasks = await self.collection.find({"deadline_date": {"$lt": now}, "is_completed": False}).to_list(
-            length=None)
-        for task in overdue_tasks:
-            new_deadline = datetime.strptime(task["deadline_date"], "%Y-%m-%d") + timedelta(days=1)
-            await self.update_task(task["_id"], {"deadline_date": new_deadline.strftime("%Y-%m-%d")})
-            logging.info(f"Продлили задачу {task['_id']} до {new_deadline.strftime('%Y-%m-%d')}")
-            # надо добавить информацию о продлении пользователю
+    async def get_overdue_tasks(self):
+        now = datetime.now(timezone.utc) + timedelta(hours=3)
+        now_date = now.strftime("%d.%m.%Y")
+        now_time = now.strftime("%H:%M")
+        tasks = await self.collection.find({"deadline_date": {"$eq": now_date},
+                                            "deadline_time": {"$eq": now_time},
+                                            "is_completed": False}).to_list()
+        return tasks
 
     async def close(self):
         self.client.close()

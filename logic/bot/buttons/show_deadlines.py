@@ -28,8 +28,7 @@ async def show_deadline_button(callback_query: types.CallbackQuery, state: FSMCo
     await callback_query.message.edit_text(
         "📋 <b>Просмотр всех задач</b>\n\n"
         "✏️ Если хотите изменить задачу, просто напишите её номер.\n"
-        "❗ Для возврата в главное меню используйте кнопку «Назад».",
-        parse_mode=ParseMode.HTML
+        "❗ Для возврата в главное меню используйте кнопку «Назад»."
     )
 
     await state.set_state(UserState.TASK_PICK)
@@ -90,8 +89,8 @@ async def show_details(message: types.Message, state: FSMContext):
         deadline_date = task["deadline_date"]
         deadline_time = task["deadline_time"]
         is_completed = "Да" if task["is_completed"] else "Нет"
-        created_at = task["created_at"].strftime("%Y-%m-%d %H:%M")
-        updated_at = task["updated_at"].strftime("%Y-%m-%d %H:%M")
+        created_at = task["created_at"].strftime("%d.%m.%Y %H:%M")
+        updated_at = task["updated_at"].strftime("%d.%m.%Y %H:%M")
         text = task["text"]
 
         reminder_date = task["reminder_date"]

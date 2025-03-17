@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, timedelta
 
 from aiogram import F, Router, types
-from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
 from logic.bot.keyboards.user_keyboards import (back_keyboard,
@@ -22,7 +21,6 @@ async def change_deadline_button(callback_query: types.CallbackQuery, state: FSM
     message = await callback_query.message.edit_text(
         "🗓 Назначьте новую <b>дату</b> этой задаче",
         reply_markup=back_keyboard(),
-        parse_mode=ParseMode.HTML
     )
     await state.update_data(last_message_id=message.message_id)
 
@@ -40,7 +38,6 @@ async def exchange_deadline_date(message: types.Message, state: FSMContext):
             "<b>Неверный формат даты</b>\n\n"
             "Пожалуйста, введите дату в одном из следующих форматов:\n"
             "<code>ДД.ММ</code> или <code>ДД.ММ.ГГГГ</code>.",
-            parse_mode=ParseMode.HTML,
             reply_markup=back_keyboard()
         )
         await state.update_data(last_message_id=new_message.message_id)
@@ -51,7 +48,6 @@ async def exchange_deadline_date(message: types.Message, state: FSMContext):
     new_message = await message.answer(
         f"🗓 Новая дата: <i>{new_date}</i>\n\n"
         "⏰ Введите новое <b>время</b> для дедлайна",
-        parse_mode=ParseMode.HTML,
         reply_markup=back_keyboard()
     )
     await state.update_data(last_message_id=new_message.message_id)
@@ -69,7 +65,6 @@ async def exchange_deadline_time(message: types.Message, state: FSMContext):
         new_message = await message.answer(
             "<b>Неверный формат времени</b>\n\n"
             "Пожалуйста, введите время в формате <code>ЧЧ:ММ</code>.",
-            parse_mode=ParseMode.HTML,
             reply_markup=back_keyboard()
         )
         await state.update_data(last_message_id=new_message.message_id)
@@ -90,7 +85,6 @@ async def exchange_deadline_time(message: types.Message, state: FSMContext):
     new_message = await message.answer(
         f"🗓 Новый дедлайн: <i>{new_date} {new_time}</i>\n\n"
         "⏰ Теперь установите <b>напоминание</b> для дедлайна.",
-        parse_mode=ParseMode.HTML,
         reply_markup=reminder_time_keyboard()
     )
     await state.update_data(last_message_id=new_message.message_id)
@@ -154,7 +148,6 @@ async def change_reminder_time(callback_query: types.CallbackQuery, state: FSMCo
         await callback_query.message.edit_text(
             message_text,
             reply_markup=task_manager_keyboard(),
-            parse_mode=ParseMode.HTML
         )
     except Exception as e:
         logging.error(e)
