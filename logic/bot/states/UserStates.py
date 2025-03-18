@@ -2,6 +2,7 @@ from aiogram.fsm.state import State, StatesGroup
 
 
 class UserState(StatesGroup):
+    MAIN_MENU = State()
     TASK_ADD_TEXT = State()
     TASK_ADD_DATE = State()
     TASK_ADD_TIME = State()

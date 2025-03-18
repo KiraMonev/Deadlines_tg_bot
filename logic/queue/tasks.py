@@ -21,14 +21,20 @@ async def check_reminders_async():
               f"Время: {datetime.now(timezone.utc) + timedelta(hours=3)}")
         for task in tasks:
             user_id = task["user_id"]
+            text = task['text']
             deadline_date = task['deadline_date']
             deadline_time = task['deadline_time']
             print(user_id)
             print(f"Попытка отправить напоминание пользователю с user_id: {user_id}")
             try:
-                await bot.send_message(chat_id=user_id,
-                                       text=f"Задача с дедлайном <i>{deadline_date} {deadline_time}</i>"
-                                            f"будет просрочена совсем скоро!")
+                await bot.send_message(
+                    chat_id=user_id,
+                    text=(
+                        "📌 <b>Напоминание о задаче!</b>\n"
+                        f"Задача: {text}\n"
+                        f"Дедлайн: <i>{deadline_date} {deadline_time}</i>\n"
+                        "Она скоро будет просрочена! Постарайтесь выполнить её вовремя."
+                    ))
                 print(f"Напоминание отправлено пользователю {user_id} о задаче {task['_id']}")
             except Exception as e:
                 print(f"Не удалось отправить напоминание пользователю {user_id}: {e}")
@@ -49,6 +55,7 @@ async def prolonging_tasks_async():
               f"Время: {datetime.now(timezone.utc) + timedelta(hours=3)}")
         for task in tasks:
             user_id = task["user_id"]
+            text = task['text']
             deadline_date = task['deadline_date']
             deadline_time = task['deadline_time']
             print(f"Попытка отправить сообщение пользователю с user_id: {user_id}")
@@ -57,9 +64,15 @@ async def prolonging_tasks_async():
                 new_date = (now + timedelta(days=1, hours=3)).strftime("%d.%m.%Y")
                 await db.update_task_details(task_id=task['_id'], new_deadline_date=new_date)
                 try:
-                    await bot.send_message(chat_id=user_id,
-                                           text=f"Задача с дедлайном <i>{deadline_date} {deadline_time}</i> "
-                                                f"продлена на 1 день!")
+                    await bot.send_message(
+                        chat_id=user_id,
+                        text=(
+                            "📌 <b>Ваша задача продлена!</b>\n"
+                            f"Задача: <i>{text}</i>\n\n"
+                            f"Старый дедлайн: <i>{deadline_date} {deadline_time}</i>\n"
+                            f"Новый дедлайн: <i>{new_date} {deadline_time}</i>\n\n"
+                            "У вас есть ещё 1 день, чтобы завершить задачу!"
+                        ))
                     print(f"Напоминание отправлено пользователю {user_id} о задаче {task['_id']}")
                 except Exception as e:
                     logging.error(f"Не удалось отправить напоминание пользователю {user_id}: {e}")
