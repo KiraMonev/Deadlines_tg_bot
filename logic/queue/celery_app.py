@@ -4,6 +4,7 @@ from celery import Celery
 
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 app = Celery('bot_tasks', broker=REDIS_URL)
+app.conf.broker_connection_retry_on_startup = True
 app.conf.worker_pool = 'solo'
 app.conf.worker_concurrency = 1
 
