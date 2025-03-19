@@ -3,7 +3,6 @@ from itertools import groupby
 from operator import itemgetter
 
 from aiogram import F, Router, types
-from aiogram.enums import ParseMode
 from aiogram.fsm.context import FSMContext
 
 from logic.bot.keyboards.user_keyboards import (back_keyboard,
@@ -54,7 +53,7 @@ async def show_deadline_button(callback_query: types.CallbackQuery, state: FSMCo
             task_text = f"<b>№{task_counter + i} {task['deadline_time']}</b> ({hours_left} ч)\n"
             task_text += f"{'<s>' + task['text'] + '</s>' if task['is_completed'] else task['text']}"
             message_text += task_text + "\n"
-        await callback_query.message.answer(message_text, parse_mode=ParseMode.HTML)
+        await callback_query.message.answer(message_text)
         task_counter += len(tasks)
 
     new_message = await callback_query.message.answer(
@@ -71,6 +70,7 @@ async def show_details(message: types.Message, state: FSMContext):
     data = await state.get_data()
 
     tasks = data.get("tasks")
+    tasks = sorted(tasks, key=lambda x: (x['deadline_date'], x['deadline_time']))
     if not tasks:
         new_message = await message.answer("Ошибка: задачи не найдены", reply_markup=back_keyboard())
         return new_message

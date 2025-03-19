@@ -18,14 +18,21 @@ async def tick_task_button(callback_query: types.CallbackQuery, state: FSMContex
     deadline_date = data["current_data"]["deadline_date"]
     deadline_time = data["current_data"]["deadline_time"]
     is_completed = "Да"
-    created_at = data["current_data"]["created_at"].strftime("%Y-%m-%d %H:%M")
-    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+    created_at = data["current_data"]["created_at"].strftime("%d.%m.%Y %H:%M")
+    updated_at = datetime.now().strftime("%d.%m.%Y %H:%M")
     text = data["current_data"]["text"]
+    reminder_date = data["current_data"]["reminder_date"]
+    reminder_time = data["current_data"]["reminder_time"]
+    if reminder_date and reminder_time:
+        reminder_text = f"{reminder_date} {reminder_time}"
+    else:
+        reminder_text = "Не установлено"
 
     try:
         message_text = (
-            f"Задача: {text}\n\n"
+            f"Задача: {text}\n"
             f"Дедлайн: {deadline_date} {deadline_time}\n"
+            f"Напоминание: {reminder_text}\n"
             f"Выполнено: {is_completed}\n"
             f"Создана: {created_at}\n"
             f"Обновлена: {updated_at}"
