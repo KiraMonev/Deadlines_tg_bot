@@ -18,11 +18,16 @@ async def send_reminder(task):
     user_id = task["user_id"]
     deadline_date = task["deadline_date"]
     deadline_time = task["deadline_time"]
+    text = task["text"]
     try:
         await bot.send_message(
             chat_id=user_id,
-            text=f"Задача с дедлайном <i>{deadline_date} {deadline_time}</i> будет просрочена совсем скоро!"
-        )
+            text=(
+                "📌 <b>Напоминание о задаче!</b>\n"
+                f"Задача: {text}\n"
+                f"Дедлайн: <i>{deadline_date} {deadline_time}</i>\n"
+                "Она скоро будет просрочена! Постарайтесь выполнить её вовремя."
+            ))
         print(f"Напоминание отправлено пользователю {user_id} о задаче {task['_id']}")
     except Exception as e:
         print(f"Не удалось отправить напоминание пользователю {user_id}: {e}")
@@ -49,6 +54,7 @@ async def prolong_task(task):
     user_id = task["user_id"]
     deadline_date = task["deadline_date"]
     deadline_time = task["deadline_time"]
+    text = task["text"]
     try:
         now = datetime.now(timezone.utc)
         new_date = (now + timedelta(days=1, hours=3)).strftime("%d.%m.%Y")
@@ -56,8 +62,13 @@ async def prolong_task(task):
         try:
             await bot.send_message(
                 chat_id=user_id,
-                text=f"Задача с дедлайном <i>{deadline_date} {deadline_time}</i> продлена на 1 день!"
-            )
+                text=(
+                    "📌 <b>Ваша задача продлена!</b>\n"
+                    f"Задача: <i>{text}</i>\n\n"
+                    f"Старый дедлайн: <i>{deadline_date} {deadline_time}</i>\n"
+                    f"Новый дедлайн: <i>{new_date} {deadline_time}</i>\n\n"
+                    "У вас есть ещё 1 день, чтобы завершить задачу!"
+                ))
             print(f"Напоминание отправлено пользователю {user_id} о задаче {task['_id']}")
         except Exception as e:
             logging.error(f"Не удалось отправить напоминание пользователю {user_id}: {e}")
