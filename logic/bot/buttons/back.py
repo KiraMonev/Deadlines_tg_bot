@@ -2,6 +2,7 @@ from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
 
 from logic.bot.keyboards.user_keyboards import start_keyboard
+from logic.bot.states.UserStates import UserState
 
 router = Router()
 
@@ -14,3 +15,4 @@ async def back_button(callback_query: types.CallbackQuery, state: FSMContext):
         "🔽 Выбери действие ниже и начнём! 🔽",
         reply_markup=start_keyboard(),
     )
+    await state.set_state(UserState.MAIN_MENU)

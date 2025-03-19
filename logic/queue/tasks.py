@@ -72,5 +72,6 @@ async def prolonging_tasks_async():
               f"Время: {datetime.now(timezone.utc) + timedelta(hours=3)}")
         if tasks:
             await asyncio.gather(*[prolong_task(task) for task in tasks])
+
     except Exception as e:
         logging.error(f"Общая ошибка при отправке напоминаний: {e}")
