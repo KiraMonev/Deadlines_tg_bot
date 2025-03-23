@@ -11,12 +11,10 @@ async def init_db():
         client = AsyncIOMotorClient(MONGO_URI)
         db = client[DB_NAME]
 
-        # Проверяем, существует ли коллекция
         existing_collections = await db.list_collection_names()
         if COLLECTION_NAME not in existing_collections:
             logging.info(f"Создаём коллекцию {COLLECTION_NAME}...")
 
-            # Создаём индексы для быстрого поиска
             await db[COLLECTION_NAME].create_indexes([
                 IndexModel([("user_id", ASCENDING)]),
                 IndexModel([("deadline_date", ASCENDING)]),

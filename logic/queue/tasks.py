@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from celery import shared_task
 
@@ -51,11 +51,21 @@ async def prolong_task(task):
     user_id = task["user_id"]
     deadline_date = task["deadline_date"]
     deadline_time = task["deadline_time"]
+    reminder_date = task["reminder_date"]
     text = task["text"]
     try:
-        now = datetime.now(timezone.utc)
-        new_date = (now + timedelta(days=1, hours=3)).strftime("%d.%m.%Y")
-        await db.update_task_details(task_id=task["_id"], new_deadline_date=new_date)
+
+        new_deadline = datetime.strptime(deadline_date, "%d.%m.%Y") + timedelta(days=1)
+        new_deadline_str = new_deadline.strftime("%d.%m.%Y")
+
+        new_reminder = datetime.strptime(reminder_date, "%d.%m.%Y") + timedelta(days=1)
+        new_reminder_str = new_reminder.strftime("%d.%m.%Y")
+
+        await db.update_task_details(
+            task_id=task["_id"],
+            new_deadline_date=new_deadline_str,
+            reminder_date=new_reminder_str
+        )
         try:
             await bot.send_message(
                 chat_id=user_id,
@@ -63,7 +73,7 @@ async def prolong_task(task):
                     "📌 <b>Ваша задача продлена!</b>\n"
                     f"Задача: <i>{text}</i>\n\n"
                     f"Старый дедлайн: <i>{deadline_date} {deadline_time}</i>\n"
-                    f"Новый дедлайн: <i>{new_date} {deadline_time}</i>\n\n"
+                    f"Новый дедлайн: <i>{new_deadline_str} {deadline_time}</i>\n\n"
                     "У вас есть ещё 1 день, чтобы завершить задачу!"
                 ))
         except Exception as e:

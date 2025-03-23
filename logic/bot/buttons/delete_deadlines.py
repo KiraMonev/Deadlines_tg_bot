@@ -34,7 +34,6 @@ async def delete_deadlines(message: types.Message, state: FSMContext):
         )
         return new_message
 
-    # Логика удаления дедлайнов
     user_id = message.from_user.id
     tasks = await db.collection.find({"user_id": user_id, "deadline_date": date}).to_list(length=None)
     if not tasks:
