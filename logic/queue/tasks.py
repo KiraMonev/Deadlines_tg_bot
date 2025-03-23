@@ -28,20 +28,17 @@ async def send_reminder(task):
                 f"Дедлайн: <i>{deadline_date} {deadline_time}</i>\n"
                 "Она скоро будет просрочена! Постарайтесь выполнить её вовремя."
             ))
-        print(f"Напоминание отправлено пользователю {user_id} о задаче {task['_id']}")
     except Exception as e:
-        print(f"Не удалось отправить напоминание пользователю {user_id}: {e}")
+        logging.error(f"Не удалось отправить напоминание пользователю {user_id}: {e}")
 
 
 async def check_reminders_async():
     try:
         tasks = await db.get_tasks_with_reminders_date_and_time()
-        print(f"Получено задач для напоминания: {len(tasks)}, "
-              f"Время: {datetime.now(timezone.utc) + timedelta(hours=3)}")
         if tasks:
             await asyncio.gather(*[send_reminder(task) for task in tasks])
     except Exception as e:
-        print(f"Общая ошибка при отправке напоминаний: {e}")
+        logging.error(f"Общая ошибка при отправке напоминаний: {e}")
 
 
 @shared_task
@@ -69,7 +66,6 @@ async def prolong_task(task):
                     f"Новый дедлайн: <i>{new_date} {deadline_time}</i>\n\n"
                     "У вас есть ещё 1 день, чтобы завершить задачу!"
                 ))
-            print(f"Напоминание отправлено пользователю {user_id} о задаче {task['_id']}")
         except Exception as e:
             logging.error(f"Не удалось отправить напоминание пользователю {user_id}: {e}")
     except Exception as e:
@@ -79,8 +75,6 @@ async def prolong_task(task):
 async def prolonging_tasks_async():
     try:
         tasks = await db.get_overdue_tasks()
-        print(f"Получено задач для продления: {len(tasks)}, "
-              f"Время: {datetime.now(timezone.utc) + timedelta(hours=3)}")
         if tasks:
             await asyncio.gather(*[prolong_task(task) for task in tasks])
 

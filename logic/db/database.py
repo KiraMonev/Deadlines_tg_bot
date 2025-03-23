@@ -68,21 +68,6 @@ class Database:
         task = await self.collection.find_one({"_id": object_id})
         return task
 
-    # Получить список невыполненных задач пользователя, у которых срок выполнения не истёк.
-    async def get_pending_tasks(self, user_id: int):
-        now = datetime.now().strftime("%Y-%m-%d")
-        tasks = await self.collection.find(
-            {"user_id": user_id, "deadline_date": {"$gte": now}, "is_completed": False}).to_list(length=None)
-        return tasks
-
-    async def set_task_reminder(self, task_id, reminder_date: str, reminder_time: str):
-        return await self.update_task(task_id, {"reminder_date": reminder_date, "reminder_time": reminder_time})
-
-    async def get_tasks_with_reminders(self):
-        now = datetime.now().strftime("%Y-%m-%d %H:%M")
-        tasks = await self.collection.find({"reminder_date": {"$lte": now}, "is_completed": False}).to_list(length=None)
-        return tasks
-
     async def get_tasks_with_reminders_date_and_time(self):
         now = datetime.now(timezone.utc) + timedelta(hours=3)
         now_date = now.strftime("%d.%m.%Y")
