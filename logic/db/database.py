@@ -21,8 +21,8 @@ class Database:
             "is_completed": False,
             "reminder_date": reminder_date,
             "reminder_time": reminder_time,
-            "created_at": datetime.now(),
-            "updated_at": datetime.now()
+            "created_at": datetime.now(timezone.utc)+timedelta(hours=3),
+            "updated_at": datetime.now(timezone.utc)+timedelta(hours=3)
         }
         return await self.collection.insert_one(task)
 

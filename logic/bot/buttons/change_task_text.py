@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from aiogram import F, Router, types
 from aiogram.enums import ParseMode
@@ -39,9 +39,8 @@ async def exchange_text(message: types.Message, state: FSMContext):
     deadline_date = cur_data["current_data"]["deadline_date"]
     deadline_time = cur_data["current_data"]["deadline_time"]
     is_completed = "Да" if cur_data["current_data"]["is_completed"] else "Нет"
-    created_at = cur_data["current_data"]["created_at"].strftime("%Y-%m-%d %H:%M")
-    updated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
-
+    created_at = cur_data["current_data"]["created_at"].strftime("%d.%m.%Y %H:%M")
+    updated_at = (datetime.now(timezone.utc) + timedelta(hours=3)).strftime("%d.%m.%Y %H:%M")
     reminder_date = cur_data["current_data"]["reminder_date"]
     reminder_time = cur_data["current_data"]["reminder_time"]
     if reminder_date and reminder_time:

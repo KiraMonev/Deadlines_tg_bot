@@ -24,7 +24,7 @@ async def init_db():
             ])
 
         else:
-            logging.info(f"Коллекция {COLLECTION_NAME} уже существует => БД существует")
+            logging.info(f"База данных уже существует")
     except Exception as e:
         logging.error(f"Ошибка при подключении или работе с базой данных: {e}")
         print("Произошла ошибка при работе с базой данных. Проверьте логи.")

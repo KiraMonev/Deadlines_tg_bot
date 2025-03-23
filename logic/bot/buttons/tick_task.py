@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
@@ -19,7 +19,7 @@ async def tick_task_button(callback_query: types.CallbackQuery, state: FSMContex
     deadline_time = data["current_data"]["deadline_time"]
     is_completed = "Да"
     created_at = data["current_data"]["created_at"].strftime("%d.%m.%Y %H:%M")
-    updated_at = datetime.now().strftime("%d.%m.%Y %H:%M")
+    updated_at = (datetime.now(timezone.utc) + timedelta(hours=3)).strftime("%d.%m.%Y %H:%M")
     text = data["current_data"]["text"]
     reminder_date = data["current_data"]["reminder_date"]
     reminder_time = data["current_data"]["reminder_time"]

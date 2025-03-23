@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from aiogram import F, Router, types
 from aiogram.fsm.context import FSMContext
@@ -129,8 +129,8 @@ async def change_reminder_time(callback_query: types.CallbackQuery, state: FSMCo
             f"Дедлайн: {new_date} {new_time}\n"
             f"Напоминание: {reminder_text}\n"
             f"Выполнено: {'Да' if task['is_completed'] else 'Нет'}\n"
-            f"Создана: {task['created_at'].strftime('%Y-%m-%d %H:%M')}\n"
-            f"Обновлена: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+            f"Создана: {task['created_at'].strftime('%d.%m.%Y %H:%M')}\n"
+            f"Обновлена: {(datetime.now(timezone.utc) + timedelta(hours=3)).strftime('%d.%m.%Y %H:%M')}"
         )
         new_message = await callback_query.message.edit_text(
             message_text,

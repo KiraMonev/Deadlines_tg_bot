@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from itertools import groupby
 from operator import itemgetter
 
@@ -16,7 +16,7 @@ router = Router()
 
 def get_hours_left(deadline_date: str, deadline_time: str) -> int:
     """Возвращает количество часов, оставшихся до дедлайна."""
-    now = datetime.now()
+    now = datetime.now() + timedelta(hours=3)
     deadline_str = f"{deadline_date} {deadline_time}"
     deadline_dt = datetime.strptime(deadline_str, "%d.%m.%Y %H:%M")
     time_left = deadline_dt - now
